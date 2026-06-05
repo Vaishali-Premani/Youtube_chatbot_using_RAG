@@ -1,0 +1,12 @@
+langchain
+langchain-core
+langchain-community
+langchain-huggingface
+transformers
+huggingface-hub
+python-dotenv
+streamlit
+youtube-transcript-api
+sentence-transformers
+faiss-cpu
+torchvision
