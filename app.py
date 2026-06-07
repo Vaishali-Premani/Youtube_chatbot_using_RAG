@@ -81,6 +81,7 @@ with st.sidebar:
 
                     # Clear previous chat when loading new video
                     st.session_state.messages = []
+                    # st.rerun()
 
                 st.success("Video processed successfully!")
 
@@ -109,23 +110,14 @@ user_query = st.chat_input(
 # ---------- Handle User Query ----------
 if user_query:
 
-    # Display user message
+    # Display user message immediately
     with st.chat_message("user"):
         st.markdown(user_query)
 
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": user_query
-        }
-    )
-
-    # Check if video is processed
+    # Safety check
     if st.session_state.retriever is None:
 
-        warning_message = (
-            "Please process a YouTube video first."
-        )
+        warning_message = "Please process a YouTube video first."
 
         with st.chat_message("assistant"):
             st.warning(warning_message)
@@ -141,17 +133,29 @@ if user_query:
 
         try:
 
+            history_for_llm = st.session_state.messages.copy()
+
             with st.chat_message("assistant"):
 
                 with st.spinner("Generating answer..."):
 
                     answer = answer_query(
                         query=user_query,
-                        retriever=st.session_state.retriever
+                        retriever=st.session_state.retriever,
+                        chat_history=history_for_llm
                     )
+
                     answer = answer.strip()
 
                     st.markdown(answer)
+
+            # Store conversation AFTER generation
+            st.session_state.messages.append(
+                {
+                    "role": "user",
+                    "content": user_query
+                }
+            )
 
             st.session_state.messages.append(
                 {
@@ -166,6 +170,13 @@ if user_query:
 
             with st.chat_message("assistant"):
                 st.error(error_message)
+                
+            st.session_state.messages.append(
+                {
+                    "role": "user",
+                    "content": user_query
+                }
+            )
 
             st.session_state.messages.append(
                 {

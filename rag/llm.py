@@ -32,26 +32,54 @@ def get_prompt():
     prompt = PromptTemplate(
         template=""" 
         You are a helpful assistant.
-        Answer the user's question ONLY using the transcript context provided below.
-        If the question is not related to the transcript provided, generate answer only when you are 100 percent sure.
-        Do not hallucinate and for every generated answer, give the confidence score.
-        do not generate confidence score for closing sentence like thank you. 
+        Use the transcript context as the primary source of information.
+        Use the conversation history only to understand references such as:
+        - it
+        - that
+        - this concept
+        - the previous answer
+        
+        Do not treat repeated topics as repeated questions.
+        
+        Do not claim that the user has asked a question before unless it explicitly appears in the conversation history.
+        
+        If the answer is not found in the transcript context, reply:
+        'I don't know'.
+        
+        Conversation history:
+        {history}
         
         Context:
         {context}
         
         Question:
         {query}
+        
+        Answer:
         """,
         
-        input_variables=["context", "query"]
+        input_variables=["history", "context", "query"]
     )
 
     return prompt
 
+def format_chat_history(chat_history):
+
+    history = []
+
+    for message in chat_history:
+
+        role = message["role"].capitalize()
+
+        history.append(
+            f"{role}: {message['content']}"
+        )
+
+    return "\n".join(history)
+
 # ---------- Answer Query ----------
 
-def answer_query(query, retriever):
+def answer_query(query, retriever, chat_history):
     """
     Complete RAG pipeline.
 
@@ -65,14 +93,19 @@ def answer_query(query, retriever):
 
     # Retrieve relevant chunks
     retrieved_docs = retriever.invoke(query)
+    
+    if not retrieved_docs:
+        return "I Don't know."
 
     # Build context
     context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
+    
+    history_text = format_chat_history(chat_history[-6:])
 
     # Prompt
     prompt = get_prompt()
 
-    final_prompt = prompt.invoke({"context": context_text, "query": query})
+    final_prompt = prompt.invoke({"history": history_text,"context": context_text, "query": query})
 
     # LLM
     model = create_llm()
