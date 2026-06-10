@@ -113,4 +113,4 @@ def answer_query(query, retriever, chat_history):
     # Generate answer
     response = model.invoke(final_prompt)
 
-    return response.content, retrieved_docs
+    return response.content

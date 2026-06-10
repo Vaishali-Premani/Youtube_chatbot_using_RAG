@@ -139,7 +139,7 @@ if user_query:
 
                 with st.spinner("Generating answer..."):
 
-                    answer, retrieved_docs = answer_query(
+                    answer = answer_query(
                         query=user_query,
                         retriever=st.session_state.retriever,
                         chat_history=history_for_llm
@@ -148,16 +148,6 @@ if user_query:
                     answer = answer.strip()
 
                     st.markdown(answer)
-                    
-                    with st.expander("📄 View Sources"):
-
-                        for i, doc in enumerate(retrieved_docs, start=1):
-
-                            st.markdown(f"### Source {i}")
-
-                            st.write(doc.page_content)
-
-                            st.divider()
 
             # Store conversation AFTER generation
             st.session_state.messages.append(
