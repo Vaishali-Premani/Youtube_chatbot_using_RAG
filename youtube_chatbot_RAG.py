@@ -78,7 +78,7 @@ prompt = PromptTemplate(
 
 # ---------- User input ----------
 while True:
-    user_query = input("Enter your query: ")
+    user_query = input("Enter your query (write 'exit' to end the conversation): ")
     
     if user_query.strip().lower() == 'exit':
         print("EXITING ...")

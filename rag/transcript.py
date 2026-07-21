@@ -1,6 +1,14 @@
 import re
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+from youtube_transcript_api.proxies import WebshareProxyConfig
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+
+proxy_username = os.getenv("WEBSHARE_PROXY_USERNAME")
+proxy_password = os.getenv("WEBSHARE_PROXY_PASSWORD")
 
 def extract_video_id(youtube_url: str) -> str:
     """
@@ -25,7 +33,14 @@ def fetch_transcript(video_id: str) -> str:
     """
 
     try:
-        transcript_data = YouTubeTranscriptApi().fetch(
+        ytt_api = YouTubeTranscriptApi(
+            proxy_config = WebshareProxyConfig(
+                proxy_username=proxy_username, 
+                proxy_password=proxy_password,
+                # filter_ip_locations=['india']
+            )
+        )
+        transcript_data = ytt_api.fetch(
             video_id=video_id,
             languages=["en"]
         )

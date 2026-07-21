@@ -103,7 +103,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 user_query = st.chat_input(
-    "Ask a question about the video...",
+    "Ask a question about the video... (write 'exit' to end the conversation)",
     disabled=not st.session_state.video_processed
 )
 
